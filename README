@@ -1,0 +1,6 @@
+There are three things here.
+    1) elm327.js: node.js module to communicate with ELM327 IC. ELM327 is OBD <-> PC interface controller.
+    2) elm-server.js: node.js app that serves information from ELM327 to client application
+    3) elm-client.js: client code to communicate with elm-server.js
+
+And test-app./js|html/ as an example application.
