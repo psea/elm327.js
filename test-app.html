@@ -4,9 +4,10 @@
     <script src="elm-client.js"></script>
     <script src="test-app.js"></script>
 </head>
-<body>
+<body onload="draw()">
     <p>ELM327 example</p>
     <input id="command"/>
     <button onClick="monitorCommand()">monitor command</button>
+    <canvas id="canvas" width="300" height="300">This page is intended for a modern browser</canvas>
 </body>
 </html>

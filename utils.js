@@ -14,29 +14,30 @@ function LoopedQueue() {
     this.pos = null;
 }
 
-LoopedQueue.prototype.add = function(data) {
-    if (this.pos === null)
-        this.pos = 0;
+LoopedQueue.prototype = { 
+    add: function (data) {
+        if (this.pos === null)
+            this.pos = 0;
+        this.queue.push(data);
+    },
 
-    this.queue.push(data);
-}
+    get next() {
+        if (this.pos === null) return null;
 
-LoopedQueue.prototype.next = function() {
-    if (this.pos === null) return null;
-
-    this.pos = (this.pos + 1 === this.queue.length) ? 0 : this.pos + 1;
-    return this.queue[this.pos];
-}
-
-LoopedQueue.prototype.current = function() {
-    if (this.pos === null) 
-        return null;
-    else 
+        this.pos = (this.pos + 1 === this.queue.length) ? 0 : this.pos + 1;
         return this.queue[this.pos];
-}
+    },
 
-LoopedQueue.prototype.isEmpty = function() {
-    return (this.queue.length === 0);
+    get current() {
+        if (this.pos === null) 
+            return null;
+        else 
+            return this.queue[this.pos];
+    },
+
+    get isEmpty() {
+        return (this.queue.length === 0);
+    }
 }
 
 /*

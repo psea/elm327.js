@@ -6,17 +6,13 @@ This object is intended for use in ELM327 polling queue.
 Constructor takes command name and callback on response function
 Callback function can use "this" to access useful information such as command and response.
 
-getELMCommand, processELMResponse are used in polling loop.
+elmCommand, processELMResponse are used in polling loop.
 */
 function ELMCommand(cmd, callback) {
     this.command = cmd;
     this.rawCommand = cmd + '\r';
     this.onResponse = callback;
 }
-
-ELMCommand.prototype.getELMCommand = function() { 
-    return this.rawCommand; 
-};
 
 ELMCommand.prototype.processELMResponse = function (data) { 
     function brushResponse(str) {
@@ -69,13 +65,13 @@ ELM327.prototype.startMonitor = function() {
 
     // When data from port ready process it and send next request
     function onData(data) {
-        queue.current().processELMResponse(data);
-        var next = queue.next();
-        port.write(next.getELMCommand(), null);  
+        queue.current.processELMResponse(data);
+        var next = queue.next;
+        port.write(next.rawCommand, null);  
     }
 
-    if (!queue.isEmpty() && port.listeners("data").length === 0) {
+    if (!queue.isEmpty && port.listeners("data").length === 0) {
         port.on("data", onData);
-        port.write(queue.current().getELMCommand(), null);
+        port.write(queue.current.rawCommand, null);
     }
 }
