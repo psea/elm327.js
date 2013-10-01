@@ -1,4 +1,5 @@
 exports.ELM327 = ELM327;
+LoopedQueue = require("./lqueue").LoopedQueue;
 
 /*
 Represents command to the ELM327 adapter.
@@ -48,7 +49,7 @@ function ELM327(device) {
     });
 
     this.port.on("open", function() {console.log("Serial port " + device + " " + "opened")});
-    this.queue = new (require("./utils").LoopedQueue)();
+    this.queue = new LoopedQueue();
 }
 
 ELM327.prototype.monitorCommand = function(command, callback) {

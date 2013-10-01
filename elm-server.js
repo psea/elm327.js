@@ -1,5 +1,5 @@
 var sys = require('sys');
-var utils = require('./utils');
+var utils = require('./some_utils');
 var elm = require('./elm327');
 
 var adapter = new elm.ELM327('/dev/ttyUSB0');
