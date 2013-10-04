@@ -10,7 +10,7 @@ Callback function can use "this" to access useful information such as command an
 elmCommand, processELMResponse are used in polling loop.
 */
 function ELMCommand(cmd, callback) {
-    this.command = cmd;
+    this.command = cmd.replace(/\s+/g,'');
     this.rawCommand = cmd + '\r';
     this.onResponse = callback;
 }
@@ -23,11 +23,22 @@ ELMCommand.prototype.processELMResponse = function (data) {
             Assume that we have echo.
             !fixme! any assumptions are bad. use echo to test response
         */
-        return str.replace(/\r+/,'\r').split('\r')[1];
+        return str.replace(/\r+/g,'\r').split('\r')[1];
     }
+    function removePIDresponse(str) {
+        return str.replace(/\s+/g, '').slice(command.length)
+    }
+    
     this.rawResponse = data;
-    this.response = removeEcho(data);
+    if (this.isATCommand())
+        this.response = removeEcho(data);
+    else
+        this.response = removePIDresponse(removeEcho(data));
     this.onResponse(this);
+}
+
+ELMCommand.prototype.isATCommand() = function() {
+    return this.command.substr(0,2).toUpperCase === 'AT'
 }
 
 /* 
