@@ -16,7 +16,7 @@ function ELMCommand(cmd, callback) {
 }
 
 ELMCommand.prototype.processELMResponse = function (data) { 
-    function brushResponse(str) {
+    function removeEcho(str) {
         /*
         Returns response without echo and carriage return symbols.
             Elm327 can response with or without echo (see ATE0 ATE1 commands).
@@ -26,7 +26,7 @@ ELMCommand.prototype.processELMResponse = function (data) {
         return str.replace(/\r+/,'\r').split('\r')[1];
     }
     this.rawResponse = data;
-    this.response = brushResponse(data);
+    this.response = removeEcho(data);
     this.onResponse(this);
 }
 
