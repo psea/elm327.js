@@ -13,7 +13,7 @@ OBDServer.prototype.addCommandListener = function (command, callback) {
 
     this.server.addEventListener(command, 
         function(evt) {
-            callback(evt.data)
+            callback(JSON.parse(evt.data))
         });
 }
 

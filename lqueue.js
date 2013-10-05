@@ -13,7 +13,7 @@ function LoopedQueue() {
 
     function isEmpty() { return (queue.length === 0) }
 
-    function toNext() { pos = (pos + 1 >== queue.length) ? 0 : pos + 1 }
+    function toNext() { pos = (pos + 1 >= queue.length) ? 0 : pos + 1 }
 
     function next() {
         toNext();

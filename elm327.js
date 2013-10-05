@@ -1,5 +1,6 @@
 exports.ELM327 = ELM327;
-LoopedQueue = require("./lqueue").LoopedQueue;
+var LoopedQueue = require("./lqueue").LoopedQueue;
+var OBD = require('./pids-db');
 
 /*
 Represents command to the ELM327 adapter.
@@ -7,38 +8,48 @@ This object is intended for use in ELM327 polling queue.
 Constructor takes command name and callback on response function
 Callback function can use "this" to access useful information such as command and response.
 
-elmCommand, processELMResponse are used in polling loop.
+rawCommand, processELMResponse are used in polling loop.
+
+!fixme! elm AT and OBD command objects should has common prototype (superclass)
+    removeEcho and removeResponseHeader should got to that common prototype
 */
-function ELMCommand(cmd, callback) {
-    this.command = cmd.replace(/\s+/g,'');
-    this.rawCommand = cmd + '\r';
-    this.onResponse = callback;
+
+/*
+Returns response without echo and carriage return symbols.
+    Elm327 can response with or without echo (see ATE0 ATE1 commands).
+    Assume that we have echo.
+    !fixme! any assumptions are bad. use echo to test response
+*/
+function removeEcho(str) {
+   return str.replace(/\r+/g,'\r').split('\r')[1];
 }
 
-ELMCommand.prototype.processELMResponse = function (data) { 
-    function removeEcho(str) {
-        /*
-        Returns response without echo and carriage return symbols.
-            Elm327 can response with or without echo (see ATE0 ATE1 commands).
-            Assume that we have echo.
-            !fixme! any assumptions are bad. use echo to test response
-        */
-        return str.replace(/\r+/g,'\r').split('\r')[1];
+function ElmATCommand(cmd, callback) {
+    var command = cmd.replace(/\s+/g,'');
+
+    function processELMResponse(str) { 
+        callback({value: removeEcho(str)});
     }
-    function removePIDresponse(str) {
-        return str.replace(/\s+/g, '').slice(command.length)
-    }
-    
-    this.rawResponse = data;
-    if (this.isATCommand())
-        this.response = removeEcho(data);
-    else
-        this.response = removePIDresponse(removeEcho(data));
-    this.onResponse(this);
+        
+    this.rawCommand = command + '\r';
+    this.processELMResponse = processELMResponse;
 }
 
-ELMCommand.prototype.isATCommand() = function() {
-    return this.command.substr(0,2).toUpperCase === 'AT'
+function ElmOBDCommand(cmd, callback) {
+    var command = cmd.replace(/\s+/g,'');
+
+    function processELMResponse(str) { 
+        function removeResponseHeader(str) {
+            return str.replace(/\s+/g, '').slice(command.length)
+        }
+        
+        var elmResponse = removeResponseHeader(removeEcho(str));
+        var OBDResponse = OBD.makeOBDResponse(command, parseFloat(elmResponse));
+        callback(OBDResponse);
+    }
+
+    this.rawCommand = OBD.getOBDCommand(command) + '\r';
+    this.processELMResponse = processELMResponse;
 }
 
 /* 
@@ -64,7 +75,13 @@ function ELM327(device) {
 }
 
 ELM327.prototype.monitorCommand = function(command, callback) {
-    this.queue.add(new ELMCommand(command, callback));
+    //!fixme! dispatch to AT and OBD command objects should be done by common prototype
+    var isATCommand = command.replace(/\s+/g,'').substr(0,2).toUpperCase() === 'AT';
+
+    if (isATCommand)
+        this.queue.add(new ElmATCommand(command, callback));
+    else
+        this.queue.add(new ElmOBDCommand(command, callback));
 }
 
 /*
@@ -79,6 +96,8 @@ ELM327.prototype.startMonitor = function() {
     function onData(data) {
         queue.current.processELMResponse(data);
         var next = queue.next();
+        //console.log(next.rawCommand);
+        //console.log(data);
         port.write(next.rawCommand, null);  
     }
 

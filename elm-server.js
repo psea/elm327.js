@@ -1,6 +1,7 @@
 var sys = require('sys');
 var utils = require('./some_utils');
 var elm = require('./elm327');
+var OBD = require('./pids-db');
 
 var adapter = new elm.ELM327('/dev/ttyUSB0');
 
@@ -53,34 +54,16 @@ function startServer (onMonitorRequest) {
 Function called by the server supplying issued command and SSE stream to response
 */
 function onMonitorRequest(command, sse) {
-    var converter = getELMConverter(command);
     function onResponse(res) {
         var sseResponse = 
             "event: " + command + '\n' + 
-            "data: " + converter.makeResponse(res.response) + "\n\n";
+            "data: " + JSON.stringify(res) + "\n\n";
         sse.write(sseResponse);
         console.log(sseResponse);
     };
-    adapter.monitorCommand(converter.elmCommand, onResponse);
+    adapter.monitorCommand(command, onResponse);
     adapter.startMonitor();
 }
 
-function getELMConverter(command) {
-    var converter;
-    switch (command) {
-        case "batteryVoltage":
-            converter = {
-                elmCommand: 'ATRV',
-                makeResponse: function(res) {return parseFloat(res)}
-            }
-            break;
-        default: 
-            converter = {
-                elmCommand: command,
-                makeResponse: function(res) {return res}
-            };
-    }
-    return converter;
-}
-
+console.log(OBD.getOBDCommand("rpm"));
 startServer(onMonitorRequest);
