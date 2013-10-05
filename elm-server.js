@@ -59,11 +59,10 @@ function onMonitorRequest(command, sse) {
             "event: " + command + '\n' + 
             "data: " + JSON.stringify(res) + "\n\n";
         sse.write(sseResponse);
-        console.log(sseResponse);
+//        console.log(sseResponse);
     };
     adapter.monitorCommand(command, onResponse);
     adapter.startMonitor();
 }
 
-console.log(OBD.getOBDCommand("rpm"));
 startServer(onMonitorRequest);

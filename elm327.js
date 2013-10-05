@@ -37,18 +37,20 @@ function ElmATCommand(cmd, callback) {
 
 function ElmOBDCommand(cmd, callback) {
     var command = cmd.replace(/\s+/g,'');
+    var obdCmd = OBD.getOBDCommand(command);
+    var rawCommand = obdCmd + '\r';
 
     function processELMResponse(str) { 
         function removeResponseHeader(str) {
-            return str.replace(/\s+/g, '').slice(command.length)
+            return str.replace(/\s+/g, '').slice(obdCmd.length)
         }
         
         var elmResponse = removeResponseHeader(removeEcho(str));
-        var OBDResponse = OBD.makeOBDResponse(command, parseFloat(elmResponse));
+        var OBDResponse = OBD.makeOBDResponse(command, parseInt(elmResponse,16));
         callback(OBDResponse);
     }
 
-    this.rawCommand = OBD.getOBDCommand(command) + '\r';
+    this.rawCommand = rawCommand; 
     this.processELMResponse = processELMResponse;
 }
 
@@ -91,8 +93,7 @@ ELM327.prototype.startMonitor = function() {
     //save port and queue in onData closure becouse "this" is not accesable when onData called
     var queue = this.queue;
     var port = this.port;
-
-    // When data from port ready process it and send next request
+// When data from port ready process it and send next request
     function onData(data) {
         queue.current.processELMResponse(data);
         var next = queue.next();

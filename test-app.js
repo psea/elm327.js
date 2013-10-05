@@ -1,10 +1,10 @@
-var obdServer = new OBDServer('http://localhost:9000/events');
+var obdServer = new OBDServer('http://127.0.0.1:9000/events');
 var ctx;
 var title;
 
 function monitorCommand() {
     ctx = document.getElementById('canvas').getContext('2d');
-    title = document.getElementById('indicatorTitle').textContent;
+    title = document.getElementById('indicatorTitle');
     var command = document.getElementById("command").value;
 
     //obdServer.addCommandListener(command, function(e) {console.log(e)});
@@ -20,9 +20,9 @@ function drawArc(a) {
 }
 
 function updateIndicator(res) {
-   console.log(res);
-   title = res.desc + " " + res.units;
-   var norm = (res.maxUnits - res.minUnits)/res.value;
+   //console.log(res);
+   title.textContent = res.desc + " " + res.units;
+   var norm = res.value/(res.maxUnits - res.minUnits);
    var a = norm*3.14;
    drawArc(a);
 }
