@@ -9,27 +9,24 @@ We can:
 */
 function LoopedQueue() {
     var queue = [];
-    var pos = null;
+    var pos = 0;
 
-    function isEmpty() {return (queue.length === 0)}
+    function isEmpty() { return (queue.length === 0) }
+
+    function toNext() { pos = (pos + 1 >== queue.length) ? 0 : pos + 1 }
 
     function next() {
-        if (isEmpty()) return null;
-        pos = (pos + 1 === queue.length) ? 0 : pos + 1;
-        return queue[pos];
+        toNext();
+        return current();
     }
 
-    function current() {return isEmpty() ? null : queue[pos]}
+    function current() {return isEmpty() ? null : queue[pos]} 
 
-    function add(obj) {
-        if (isEmpty())
-            pos = 0;
-        queue.push(obj);
-    };
+    function add(obj) { queue.push(obj) }
  
     //Define interface
-    Object.defineProperty(this, "next",    {get: next});
     Object.defineProperty(this, "current", {get: current});
     Object.defineProperty(this, "isEmpty", {get: isEmpty});
     this.add = add; 
+    this.next = next;
 }

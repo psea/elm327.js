@@ -78,7 +78,7 @@ ELM327.prototype.startMonitor = function() {
     // When data from port ready process it and send next request
     function onData(data) {
         queue.current.processELMResponse(data);
-        var next = queue.next;
+        var next = queue.next();
         port.write(next.rawCommand, null);  
     }
 
